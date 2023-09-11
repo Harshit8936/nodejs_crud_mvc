@@ -2,6 +2,7 @@ const router = require('express').Router();
 const User = require('../models/user');
 const multer = require('multer');
 const fs = require('fs');
+const userController = require('../controllers/userController');
 
 // image upload
 var storage = multer.diskStorage({
@@ -40,19 +41,7 @@ router.post("/addUser",upload,(req,res)=>{
     }
 })
 
-// get all users list
-router.get("/",async (req,res)=>{
-    try{
-        const users = await User.find();
-        res.render("index",{
-            title:"Home page",
-            users:users,
-        })
-    }catch(err){
-        res.json({status:400,message:err})
-    }
 
-})
 
 // Add new user
 router.get("/add",(req,res)=>{
@@ -60,21 +49,6 @@ router.get("/add",(req,res)=>{
 })
 
 // update an existing  user
-
-router.get("/edit/:id",async (req,res)=>{
-    try{
-        let id = req.params.id;
-        const user = await User.findById(id);
-        if(user){
-            res.render("edit_user",{title:"Update User",user:user})
-        }else{
-            res.redirect("/")
-        }
-    }catch(err){
-        res.json({status:400,message:err})
-    }
-})
-
 
 router.post("/updateUser/:id",upload,async(req,res)=>{
 try {
@@ -113,29 +87,23 @@ router.get('/delete/:id',async (req,res)=>{
         let id = req.params.id;
         await User.findByIdAndRemove(id);
         res.redirect("/");
-    //    await User.findByIdAndRemove(id,(err,result)=>{
-            // if(result.image!=''){
-            //     try {
-            //         fs.unlinkSync('./uploads/'+result.image);
-            //     } catch (error) {
-            //         console.log(error)
-            //     }
-            // }
-            // if(err){
-            //     res.json({message:err.message})
-            // }else{
-            //     req.session.message={
-            //         type:'info',
-            //         message:"Deleted !"
-            //     }
-            // }
-        // })
     }
     catch(err){
         res.json({status:400,message:err})
     }
         
 })
+
+// get all users route
+router.get('/',userController.allUsers);
+// get singl user route
+router.get("/edit/:id",userController.singleUser);
+
+// about router
+router.get('/about',userController.about);
+
+// contact router
+router.get('/contact',userController.contact);
 
 module.exports = router;
 
